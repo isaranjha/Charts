@@ -244,23 +244,21 @@ open class YAxisRenderer: NSObject, AxisRenderer
         context.drawPath(using: CGPathDrawingMode.stroke)
     }
     
-    open func renderLimitLines(context: CGContext)
-    {
+    open func renderLimitLines(context: CGContext) {
         guard let transformer = self.transformer else { return }
         
         let limitLines = axis.limitLines
         
         guard !limitLines.isEmpty else { return }
-
+        
         context.saveGState()
         defer { context.restoreGState() }
-
+        
         let trans = transformer.valueToPixelMatrix
         
         var position = CGPoint(x: 0.0, y: 0.0)
         
-        for l in limitLines where l.isEnabled
-        {
+        for l in limitLines where l.isEnabled {
             context.saveGState()
             defer { context.restoreGState() }
             
@@ -279,12 +277,9 @@ open class YAxisRenderer: NSObject, AxisRenderer
             
             context.setStrokeColor(l.lineColor.cgColor)
             context.setLineWidth(l.lineWidth)
-            if l.lineDashLengths != nil
-            {
+            if l.lineDashLengths != nil {
                 context.setLineDash(phase: l.lineDashPhase, lengths: l.lineDashLengths!)
-            }
-            else
-            {
+            } else {
                 context.setLineDash(phase: 0.0, lengths: [])
             }
             
@@ -294,44 +289,47 @@ open class YAxisRenderer: NSObject, AxisRenderer
             
             // if drawing the limit-value label is enabled
             guard l.drawLabelEnabled, !label.isEmpty else { continue }
-
+            
             let labelLineHeight = l.valueFont.lineHeight
-
+            
             let xOffset = 4.0 + l.xOffset
             let yOffset = l.lineWidth + labelLineHeight + l.yOffset
-
+            
             let align: TextAlignment
             let point: CGPoint
-
-            switch l.labelPosition
-            {
+            
+            switch l.labelPosition {
             case .rightTop:
                 align = .right
-                point = CGPoint(x: viewPortHandler.contentRight - xOffset,
-                                y: position.y - yOffset)
-
+                point = CGPoint(x: position.y - yOffset, y: viewPortHandler.contentRight - xOffset)
+                // Swap x and y coordinates and adjust the x-coordinate value
+                
             case .rightBottom:
                 align = .right
-                point = CGPoint(x: viewPortHandler.contentRight - xOffset,
-                                y: position.y + yOffset - labelLineHeight)
-
+                point = CGPoint(x: position.y + yOffset - labelLineHeight, y: viewPortHandler.contentRight - xOffset)
+                // Swap x and y coordinates and adjust the x-coordinate value
+                
             case .leftTop:
                 align = .left
-                point = CGPoint(x: viewPortHandler.contentLeft + xOffset,
-                                y: position.y - yOffset)
-
+                point = CGPoint(x: position.y - yOffset, y: viewPortHandler.contentLeft + xOffset)
+                // Swap x and y coordinates and adjust the x-coordinate value
+                
             case .leftBottom:
                 align = .left
-                point = CGPoint(x: viewPortHandler.contentLeft + xOffset,
-                                y: position.y + yOffset - labelLineHeight)
+                point = CGPoint(x: position.y + yOffset - labelLineHeight, y: viewPortHandler.contentLeft + xOffset)
+                // Swap x and y coordinates and adjust the x-coordinate value
             }
-
+            
+            // Rotate the label by 90º to the right
+            context.rotate(by: .pi / 2)
+            
             context.drawText(label,
                              at: point,
                              align: align,
                              attributes: [.font: l.valueFont, .foregroundColor: l.valueTextColor])
         }
     }
+
 
     @objc open func computeAxis(min: Double, max: Double, inverted: Bool)
     {
