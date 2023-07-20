@@ -459,6 +459,7 @@ open class XAxisRenderer: NSObject, AxisRenderer
         ]
 
         let attributedString = NSAttributedString(string: label, attributes: attributes)
+        let textRect = attributedString.boundingRect(with: CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
 
         switch limitLine.labelPosition
         {
@@ -467,7 +468,8 @@ open class XAxisRenderer: NSObject, AxisRenderer
             context.saveGState()
             context.translateBy(x: point.x, y: point.y)
             context.rotate(by: .pi / 2)
-            attributedString.draw(at: point)
+            context.translateBy(x: 0, y: -textRect.height)
+            attributedString.draw(at: CGPoint.zero)
             context.restoreGState()
 
         case .rightBottom:
