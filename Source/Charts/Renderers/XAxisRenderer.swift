@@ -11,7 +11,6 @@
 
 import Foundation
 import CoreGraphics
-import AppKit
 
 
 @objc(ChartXAxisRenderer)
@@ -444,65 +443,46 @@ open class XAxisRenderer: NSObject, AxisRenderer
     }
     
     @objc open func renderLimitLineLabel(context: CGContext, limitLine: ChartLimitLine, position: CGPoint, yOffset: CGFloat)
+    {
+        let label = limitLine.label
+
+        // if drawing the limit-value label is enabled
+        guard limitLine.drawLabelEnabled, !label.isEmpty else { return }
+
+        let labelLineHeight = limitLine.valueFont.lineHeight
+
+        let xOffset: CGFloat = limitLine.lineWidth + limitLine.xOffset
+
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: limitLine.valueFont,
+            .foregroundColor: limitLine.valueTextColor
+        ]
+
+        let attributedString = NSAttributedString(string: label, attributes: attributes)
+
+        switch limitLine.labelPosition
         {
-            let label = limitLine.label
-            
-            // if drawing the limit-value label is enabled
-            guard limitLine.drawLabelEnabled, !label.isEmpty else { return }
+        case .rightTop:
+            let point = CGPoint(x: position.x + xOffset, y: viewPortHandler.contentTop + yOffset)
+            context.saveGState()
+            context.translateBy(x: point.x, y: point.y)
+            context.rotate(by: -.pi / 2)
+            attributedString.draw(at: CGPoint.zero)
+            context.restoreGState()
 
-            let labelLineHeight = limitLine.valueFont.lineHeight
+        case .rightBottom:
+            let point = CGPoint(x: position.x + xOffset, y: viewPortHandler.contentBottom - labelLineHeight - yOffset)
+            attributedString.draw(at: point)
 
-            let xOffset: CGFloat = limitLine.lineWidth + limitLine.xOffset
+        case .leftTop:
+            let point = CGPoint(x: position.x - xOffset, y: viewPortHandler.contentTop + yOffset)
+            attributedString.draw(at: point)
 
-            let align: NSTextAlignment
-            let point: CGPoint
-
-            switch limitLine.labelPosition
-            {
-            case .rightTop:
-                align = .left
-                point = CGPoint(x: position.x + xOffset,
-                                y: viewPortHandler.contentTop + yOffset)
-                context.saveGState()
-                context.translateBy(x: point.x, y: point.y)
-                context.rotate(by: -.pi / 2)
-                context.drawText(label,
-                                 at: CGPoint.zero,
-                                 align: align,
-                                 attributes: [.font: limitLine.valueFont,
-                                              .foregroundColor: limitLine.valueTextColor])
-                context.restoreGState()
-
-            case .rightBottom:
-                align = .left
-                point = CGPoint(x: position.x + xOffset,
-                                y: viewPortHandler.contentBottom - labelLineHeight - yOffset)
-                context.drawText(label,
-                                 at: point,
-                                 align: align,
-                                 attributes: [.font: limitLine.valueFont,
-                                              .foregroundColor: limitLine.valueTextColor])
-
-            case .leftTop:
-                align = .right
-                point = CGPoint(x: position.x - xOffset,
-                                y: viewPortHandler.contentTop + yOffset)
-                context.drawText(label,
-                                 at: point,
-                                 align: align,
-                                 attributes: [.font: limitLine.valueFont,
-                                              .foregroundColor: limitLine.valueTextColor])
-
-            case .leftBottom:
-                align = .right
-                point = CGPoint(x: position.x - xOffset,
-                                y: viewPortHandler.contentBottom - labelLineHeight - yOffset)
-                context.drawText(label,
-                                 at: point,
-                                 align: align,
-                                 attributes: [.font: limitLine.valueFont,
-                                              .foregroundColor: limitLine.valueTextColor])
-            }
+        case .leftBottom:
+            let point = CGPoint(x: position.x - xOffset, y: viewPortHandler.contentBottom - labelLineHeight - yOffset)
+            attributedString.draw(at: point)
+        }
     }
+
 
 }
