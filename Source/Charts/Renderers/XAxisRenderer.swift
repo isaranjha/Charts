@@ -466,7 +466,7 @@ open class XAxisRenderer: NSObject, AxisRenderer
             let point = CGPoint(x: position.x + xOffset, y: viewPortHandler.contentTop + yOffset)
             context.saveGState()
             context.translateBy(x: point.x, y: point.y)
-            context.rotate(by: -.pi / 2)
+            context.rotate(by: .pi / 2)
             attributedString.draw(at: CGPoint.zero)
             context.restoreGState()
 
