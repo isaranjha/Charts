@@ -467,7 +467,7 @@ open class XAxisRenderer: NSObject, AxisRenderer
             context.saveGState()
             context.translateBy(x: point.x, y: point.y)
             context.rotate(by: .pi / 2)
-            attributedString.draw(at: CGPoint.zero)
+            attributedString.draw(at: point)
             context.restoreGState()
 
         case .rightBottom:
